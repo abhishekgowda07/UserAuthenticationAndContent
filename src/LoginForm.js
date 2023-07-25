@@ -28,6 +28,10 @@ const LoginForm = () => {
     }
   };
 
+  const handleSignup = () => {
+    navigate('/signup'); // Navigate to the signup page
+  };
+
   return (
     <div
       style={{
@@ -114,6 +118,25 @@ const LoginForm = () => {
           />
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
+        <button
+          onClick={handleSignup}
+          style={{
+            border: 'none',
+            background: 'none',
+            display: 'block',
+            margin: '20px auto',
+            textAlign: 'center',
+            border: '2px solid #3498db',
+            padding: '14px 40px',
+            outline: 'none',
+            color: 'white',
+            borderRadius: '24px',
+            transition: '0.25s',
+            cursor: 'pointer',
+          }}
+        >
+          Don't have an account? Signup
+        </button>
       </div>
     </div>
   );

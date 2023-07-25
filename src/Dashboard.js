@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [userData, setUserData] = useState({});
   const [content, setContent] = useState('');
   const [posts, setPosts] = useState([]);
   const [title, setTitle] = useState('');
+  const navigate = useNavigate();
 
   const cardStyle = {
     width: '200px',
@@ -31,19 +33,16 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const username = localStorage.getItem('username');
-        //console.log(username);
-
         if (!username) {
-          // Handle the case when username is not available in local storage
+          navigate('/login'); // Redirect to the login page if the user is not logged in
           return;
         }
 
         const response = await axios.post(
           'http://localhost:5000/api/dashboard',
-          { username }   // Include credentials (session cookie)
+          { username }
         );
-        console.log(response.data.user);
-        setUserData(response.data.user); // Set the user data in the state
+        setUserData(response.data.user);
         setPosts(Array.from(response.data.user.post));
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -51,46 +50,50 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handlePosts = async (e) => {
     e.preventDefault();
-  
+
     try {
       const response = await axios.post('http://localhost:5000/api/posts', {
         title,
         content,
         author: userData.username,
       });
-  
+
       console.log(response.data);
-      if (response.data.message === "Added Post") {
-        // Fetch the updated list of posts after successful addition
+      if (response.data.message === 'Added Post') {
         const updatedPostsResponse = await axios.post(
           'http://localhost:5000/api/dashboard',
           { username: userData.username }
         );
-  
-        // Update the posts state with the updated list of posts
         setPosts(Array.from(updatedPostsResponse.data.user.post));
-        setTitle(''); // Clear the title and content inputs
+        setTitle('');
         setContent('');
       }
     } catch (err) {
       console.error('Error adding post:', err);
     }
   };
-  
-  const handleDeletePost = async (tit,content) => {
+
+  const handleDeletePost = async (tit, content) => {
     try {
-      await axios.post(`http://localhost:5000/api/deltposts`,{tit,content,author:userData.username});
+      await axios.post('http://localhost:5000/api/deltposts', {
+        tit,
+        content,
+        author: userData.username,
+      });
       console.log('Post deleted:', tit);
-      //window.location.reload();
-      // After successful deletion, you can update the posts state to reflect the updated list of posts
       setPosts((prevPosts) => prevPosts.filter(([title, content]) => title !== tit));
     } catch (error) {
       console.error('Error deleting post:', error);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    navigate('/login');
   };
 
   return (
@@ -99,8 +102,31 @@ const Dashboard = () => {
         background: 'linear-gradient(to right, #b92b27, #1565c0)',
         minHeight: '100vh',
         padding: '20px',
+        position: 'relative',
       }}
     >
+      {/* Logout button in the top-right corner */}
+      <button
+        onClick={handleLogout}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          border: 'none',
+          background: 'none',
+          textAlign: 'center',
+          border: '2px solid #e74c3c',
+          padding: '10px 20px',
+          outline: 'none',
+          color: 'white',
+          borderRadius: '24px',
+          transition: '0.25s',
+          cursor: 'pointer',
+        }}
+      >
+        Logout
+      </button>
+
       <h2 style={{ color: 'white' }}>Welcome to the Dashboard {userData.username}!</h2>
       <h2 style={{ color: 'white' }}>Add New Post</h2>
       <input
@@ -168,7 +194,7 @@ const Dashboard = () => {
           <div key={index} style={cardStyle}>
             <h3 style={titleStyle}>{title}</h3>
             <p style={contentStyle}>{content}</p>
-            <button onClick={() => handleDeletePost(title,content)} style={{ cursor: 'pointer' }}>
+            <button onClick={() => handleDeletePost(title, content)} style={{ cursor: 'pointer' }}>
               Delete Post
             </button>
           </div>

@@ -71,7 +71,7 @@ const SignupForm = () => {
         <form onSubmit={handleSignup}>
           <h1 style={{ color: 'white', textTransform: 'uppercase', fontWeight: 500 }}>Signup</h1>
           <input
-            type="text"
+            type='email'
             name="username"
             placeholder="Username"
             style={{
@@ -90,6 +90,8 @@ const SignupForm = () => {
             }}
             value={username}
             onChange={handleInputChange}
+            required
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
           />
           <input
             type="password"
@@ -111,6 +113,7 @@ const SignupForm = () => {
             }}
             value={password}
             onChange={handleInputChange}
+            required
           />
           <input
             type="submit"
